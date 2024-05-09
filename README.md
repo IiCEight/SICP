@@ -1,5 +1,7 @@
 # Exercises of SICP
 ## Note:
+Hello everyone.
+
 The theoretical problems are skipped and I only solve some of porgramming problems here.
 
 Here is the list of exerises which are **NOT** solved.
