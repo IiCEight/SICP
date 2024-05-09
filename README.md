@@ -1,6 +1,5 @@
 # Exercises of SICP
 ## Note:
-Hello everyone.
 
 The theoretical problems are skipped and I only solve some of porgramming problems here.
 
