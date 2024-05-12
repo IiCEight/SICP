@@ -11,4 +11,3 @@ Here is the list of exerises which are **NOT** solved.
 
 
 This is dev commit
-
