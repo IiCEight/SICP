@@ -7,3 +7,8 @@ Here is the list of exerises which are **NOT** solved.
 
 ## Chatper 1
 ### 1.1 The Elements of Programming
+
+
+
+This is dev commit
+
