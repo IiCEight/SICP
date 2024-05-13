@@ -1,0 +1,2 @@
+
+            (/ (abs (- guess lastValue)) gu
