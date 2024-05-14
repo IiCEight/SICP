@@ -7,3 +7,4 @@ Here is the list of exerises which are **NOT** solved.
 
 ## Chatper 1
 ### 1.1 The Elements of Programming
+exercise 1.28 Miller-Rabin test (To be solved)
