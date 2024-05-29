@@ -22,15 +22,13 @@
         (/ (+ lhs rhs) 2)
 )
 
-(define goldenRatioInv
-        (fixedPoint (lambda (x)  (+ 1.0 (/ 1 x)) ) 
-                                ;(1 + 1/x)
-                    1
-        )
+
+
+(display (fixedPoint 
+                    (lambda (x) (/ (log 1000) (log x)))
+                    2
+         )
+
 )
 
-; (display (productIter identity 1 4 next 1))
-; (display (fixedPoint cos 1))
-
-(display (/ 1 goldenRatioInv) )
 (exit)
