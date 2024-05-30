@@ -13,3 +13,4 @@ exercise 1.33 (To be solved)
 exercise 1.45 (To be solved)
 
 ## Chapter 2
+exercise 2.3 Implement a representation for rectangles (To be solved)
