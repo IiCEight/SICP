@@ -186,6 +186,7 @@ The ability to create pairs whose elements are pairs is the essenceb of list str
 						nil). . .)))
 ```
 
+Scheme includes a **primitive** predicate `null?`, which tests whether its argument is the empty list.
 
 
 #### Dotted-tail notation
@@ -198,3 +199,21 @@ The ability to create pairs whose elements are pairs is the essenceb of list str
 Then in the body of $f$, $x$ will be 1, $y$ will be 2, and $z$ will be the list (3 4 5 6). 
 
 see also exercise 2.20
+
+
+#### Mapping over list
+One extremely useful operation is to apply some transformation to each element in a list and generate the list of results.
+
+map takes as arguments a procedureof one argument and a list, and returns a list of the results produced by applying the procedure to each element in the list
+
+```scheme
+(define (map proc items)
+		(if (null? items)
+			nil
+			(cons (proc (car items))
+				(map proc (cdr items))
+			)
+		)
+)
+(map abs (list -10 2.5 -11.6 17))
+```
