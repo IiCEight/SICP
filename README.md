@@ -20,3 +20,7 @@ exercise 2.6 (To be solved)
 exercise 2.15 and 2.16 (To be solved)
 
 exercise 2.19 (To be solved)
+
+exercise 2.23 (To be solved)
+
+exercise 2.29 (To be soved)

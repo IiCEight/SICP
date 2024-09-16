@@ -217,3 +217,42 @@ map takes as arguments a procedureof one argument and a list, and returns a list
 )
 (map abs (list -10 2.5 -11.6 17))
 ```
+
+#### Hierarchical Structures
+
+```scheme
+(cons (list 1 2) (list 3 4))
+```
+The result is `((1 2) 3 4)`. Now `car` will get a list.
+
+```scheme
+(define x (cons (list 1 2) (list 3 4)))
+(length x)
+```
+It will get `3`.
+
+So we need to count the number of leaves of a list.
+
+To aid in writing recursive procedures on trees, Scheme provides the **primitive** predicate `pair?`, which tests whether its argument is a pair.
+
+### append
+```scheme
+(define x (list (list 1) 2))
+(define y (list 3 4))
+(define z (append x y))
+
+(display x) ; ((1) 2)
+(newline)
+(display z) ; ((1) 2 3 4)
+```
+It will remove one pair of parentheses and add one in the external.
+
+More examples:
+```scheme
+(define x (list)) ; ()
+(define y (list 3 4)) ; (3 4)
+
+(cons x y); (() 3 4)
+(append x y); (3 4)
+(list x y); (() (3 4))
+```
