@@ -1,4 +1,4 @@
-# Structure and Interpretation of Computer Progarms
+# Structure and Interpretation of Computer Programs
 
 ## 1 Building Abstractions with Procedures
 
@@ -23,7 +23,7 @@ In the Scheme dialect of Lisp, we name things with `define`. Typing
 
 
 
-#### 1.1.5 The Subsitution Model for Procdure Application
+#### 1.1.5 The Substitution Model for Procedure Application
 
 To apply a compound procedure to arguments, evaluate the body of the procedure with each  formal parameter replaced by the corresponding argument.
 
