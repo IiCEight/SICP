@@ -23,4 +23,10 @@ exercise 2.19 (To be solved)
 
 exercise 2.23 (To be solved)
 
-exercise 2.29 (To be soved)
+exercise 2.29 (To be solved)
+
+exercise 2.33 (To be solved)
+
+exercise 2.35 (To be solved)
+
+exercise 2.39 (To be solved)

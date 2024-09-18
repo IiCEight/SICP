@@ -139,7 +139,7 @@ The general form of a let expression is
 )
 ```
 
-
+he let expression binds variables to values and evaluates a body of expressions using these bindings. 
 
 #### Newton’s method 
 
@@ -218,6 +218,13 @@ map takes as arguments a procedureof one argument and a list, and returns a list
 (map abs (list -10 2.5 -11.6 17))
 ```
 
+Scheme standardly provides a map procedure that is more general than the one described here. is more general map takes a procedure of n arguments, together with n lists, and applies the procedure to all the first elements of the lists, all the second elements of the lists, and so on, returning a list of the results.
+
+```scheme
+map(+ (list 1 2 3 4) (list 1 2 3 4)) ; (2 4 6 8)
+```
+
+
 #### Hierarchical Structures
 
 ```scheme
@@ -256,3 +263,13 @@ More examples:
 (append x y); (3 4)
 (list x y); (() (3 4))
 ```
+`(list a b)` will remain a,b unchanged and add one pair of parentheses of them (a b).
+
+`(cons a b)` will remain a but remove one external pair of parentheses of b (if exists) and add one pair of parentheses of them.
+
+`(append a b)` will remove one external pair of parentheses of a and b and then add one pair of parentheses of them.
+
+
+#### Horner’s rule
+
+In fact, it is possible to prove that any algorithm for evaluating arbitrary polynomials must use at least as many additions and multiplications as does Horner’s rule, and thus Horner’s rule is an **optimal** algorithm for polynomial evaluation.

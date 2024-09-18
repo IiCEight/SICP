@@ -1,5 +1,3 @@
-
-
 (define (dfs x)
     (if (pair? x)
         (cons
@@ -7,5 +5,5 @@
             (dfs (cdr x))
         )
         x
-    )        
+    )
 )
