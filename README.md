@@ -29,4 +29,9 @@ exercise 2.33 (To be solved)
 
 exercise 2.35 (To be solved)
 
-exercise 2.39 (To be solved)
+exercise 2.38 and 2.39 (To be solved)
+
+exercise 2.41 Eight Queens (To be solved)
+
+exercise 2.42 - 2.53 (To be solved)
+

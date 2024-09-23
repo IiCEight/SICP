@@ -242,7 +242,7 @@ So we need to count the number of leaves of a list.
 
 To aid in writing recursive procedures on trees, Scheme provides the **primitive** predicate `pair?`, which tests whether its argument is a pair.
 
-### append
+#### append
 ```scheme
 (define x (list (list 1) 2))
 (define y (list 3 4))
@@ -273,3 +273,56 @@ More examples:
 #### Horner’s rule
 
 In fact, it is possible to prove that any algorithm for evaluating arbitrary polynomials must use at least as many additions and multiplications as does Horner’s rule, and thus Horner’s rule is an **optimal** algorithm for polynomial evaluation.
+
+#### flatmap
+
+```scheme
+(define (flatmap proc seq)
+    (accumulate append nil (map proc seq))
+)
+```
+
+#### Picture Language(Skipped)
+
+### 2.3 Symbolic Data
+
+```scheme
+(define a 1)
+(define b 2)
+(list a b)
+(1 2)
+(list 'a 'b)
+(a b)
+(list 'a b)
+(a 2)
+```
+
+Strictly, our use of the quotation mark violates the general rule that all compound expressions in our language should be delimited by parentheses and look like lists. We can recover this consistency by introducing a special form quote, which serves the same purpose as the quotation mark. us, we would type (quote a) instead of 'a, and we would type (quote (a b c)) instead of '(a b c).
+
+```scheme
+(car '(a b c))
+a
+(cdr '(a b c))
+(b c)
+```
+
+In keeping with this, we can obtain the empty list by evaluating `'()`, and thus dispense with the variable `nil`.
+
+One additional primitive used in manipulating symbols is `eq?`, which takes two symbols as arguments and tests whether they are the same.
+
+#### memq
+```scheme
+(define (memq item x)
+	(cond
+		((null? x) falsh)
+		((eq? item (car x)) x)
+		(else (memq item (cdr x)))
+	)
+)
+```
+
+for example:
+
+```scheme 
+(memq 'apple '(pear banana prune))
+
