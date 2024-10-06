@@ -37,4 +37,6 @@ exercise 2.42 - 2.53 (To be solved)
 
 exercise 2.55 - 2.61 (To be solved)
 
+exercise 2.63 - 2.74 (To be solved)
+
 

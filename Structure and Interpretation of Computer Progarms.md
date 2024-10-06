@@ -325,9 +325,18 @@ for example:
 
 ```scheme 
 (memq 'apple '(pear banana prune))
-
+```
 
 ### 2.4 Multiple Representations for Abstract Data
 
 We begin with the simple complex-number example. We will see how type tags and data-directed style enable us to design separate rectangular and polar representations for complex numbers while maintaining the notion of an abstract “complex-number” data object.
+
+#### Message passing
+See at page 252
+
+
+### 2.5 Systems with Generic Operations
+
+
+#### Hierarchies of types
 
