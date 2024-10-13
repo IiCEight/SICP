@@ -284,6 +284,8 @@ In fact, it is possible to prove that any algorithm for evaluating arbitrary pol
 
 #### Picture Language(Skipped)
 
+
+
 ### 2.3 Symbolic Data
 
 ```scheme
@@ -327,12 +329,18 @@ for example:
 (memq 'apple '(pear banana prune))
 ```
 
+
+
 ### 2.4 Multiple Representations for Abstract Data
 
 We begin with the simple complex-number example. We will see how type tags and data-directed style enable us to design separate rectangular and polar representations for complex numbers while maintaining the notion of an abstract “complex-number” data object.
 
+
+
 #### Message passing
 See at page 252
+
+
 
 
 ### 2.5 Systems with Generic Operations
@@ -340,3 +348,22 @@ See at page 252
 
 #### Hierarchies of types
 
+
+
+## 3 Modularity, Objects, and State
+
+#### set!
+
+```scheme
+(set! <name> <new-value>)
+```
+
+
+
+#### begin
+
+```scheme
+(begin <exp1> <exp2> ... <expk>)
+```
+
+Evaluate <exp1>, and then evaluate <exp2>,and so on. Finally return the evaluation of <expk>.
