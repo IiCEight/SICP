@@ -351,6 +351,8 @@ See at page 252
 
 
 ## 3 Modularity, Objects, and State
+#### 3.1.1 Local State Variables
+This **Local State Variables** will store even after this function is called. This Local State Variables describing the actual state of function.
 
 #### set!
 
@@ -359,11 +361,55 @@ See at page 252
 ```
 
 
-
 #### begin
 
 ```scheme
 (begin <exp1> <exp2> ... <expk>)
+
 ```
 
-Evaluate <exp1>, and then evaluate <exp2>,and so on. Finally return the evaluation of <expk>.
+Evaluate exp1, and then evaluate exp2,and so on. Finally return the evaluation of expk.
+
+Now we give a gobal state variable as an example:
+```shceme
+(define balance 100)
+(define (withdraw amount)
+	(if (>= balance amount)
+		(begin (set! balance (- balance amount)) balance)
+		"Insufficient funds"
+	)
+)
+
+(withdraw 25)
+75
+(withdraw 25)
+50
+(withdraw 60)
+"Insufficient funds"
+(withdraw 15)
+35
+```
+**Note:** Balance is a **Global state variable**. `(withdraw 25)` Evaluated two times with the same parameter but gives different value. **This is not a pure function since it depends on global state variable `balance`**
+
+However this presents a problem. As specified above, balance is a name defined in the global environment and is freely accessible to be examined or modified by any procedure.
+
+It would be much beer if we could somehow make balance
+internal to withdraw, so that withdraw would be the only procedure that could access balance directly and any other procedure could access balance only indirectly (through calls to withdraw). This would more accurately model the notion that balance is a **local state variable** used by `withdraw` to keep track of the state of the account..
+
+We can make balance internal to withdraw by rewriting the definition as follows:
+```scheme
+(define new-withdraw
+	(let ((balance 100))
+		(lambda (amount)
+			(if (>= balance amount)
+				(begin (set! balance (- balance amount)) balance)
+				"Insufficient funds"
+			)
+		)
+	)
+)
+```
+What we have done here is use `let` to establish an environment with a
+local variable balance, bound to the initial value 100.
+
+#### 3.1.2 The Benefits of Introducing Assignment
