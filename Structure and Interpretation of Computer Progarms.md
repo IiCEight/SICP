@@ -393,7 +393,7 @@ Now we give a gobal state variable as an example:
 
 However this presents a problem. As specified above, balance is a name defined in the global environment and is freely accessible to be examined or modified by any procedure.
 
-It would be much beer if we could somehow make balance
+It would be much better if we could somehow make balance
 internal to withdraw, so that withdraw would be the only procedure that could access balance directly and any other procedure could access balance only indirectly (through calls to withdraw). This would more accurately model the notion that balance is a **local state variable** used by `withdraw` to keep track of the state of the account..
 
 We can make balance internal to withdraw by rewriting the definition as follows:
@@ -412,4 +412,75 @@ We can make balance internal to withdraw by rewriting the definition as follows:
 What we have done here is use `let` to establish an environment with a
 local variable balance, bound to the initial value 100.
 
-#### 3.1.2 The Benefits of Introducing Assignment
+
+
+
+
+### 3.2 The Environment Model of Evaluation
+
+An **environment** is a sequence of **frames**. Each frame is a table (possibly empty) of bindings, which associate variable names with their corresponding values. (A single frame may contain at most one binding
+for any variable.) Each frame also has a pointer to its enclosing environment, unless, for the purposes of discussion, the frame is considered to be global. **The value of a variable with respect to an environment is the value given by the binding of the variable in the first frame in the environment that contains a binding for that variable.** If no frame in the sequence specifies a binding for the variable, then the variable is said to be **unbound** in the environment.
+
+
+
+Procedures are created in one way only: by evaluating a λ-expression.
+
+```scheme
+(define (square x)
+(* x x))
+
+; this is just syntactic sugar for an underlying implicit λ-expression.
+
+(define square 
+  (lambda (x) (* x x))
+)
+```
+
+The environment model of procedure application can be summarized by two rules:
+
+1.A object is applied to a set of arguments by constructing a frame, binding the formal parameters of the procedure to the arguments of the call, and then evaluating the body of the procedure in the context of the new environment constructed. The new frame has as its enclosing environment the environment part of the procedure object being applied.
+
+2.A procedure is created by evaluating a λ-expression relative to a given environment. **The resulting procedure object is a pair** consisting of the text of the λ-expression and a pointer to the environment in which the procedure was created.
+
+
+
+**For Short**
+
+**call:**
+
+When procedure is called, it will create a environment with arguments in it. And the parent environment or more formal, enclosing environment is the environment that procedure object being called.
+
+**define:**
+
+Define a procedure will create a variable or say procedure object. It's a pair. First point the code or text of the lambda-expression and second will point to the environmnet in which the procedure was created.
+
+
+
+Evaluating the expression (`set! <variable> <value>`) in some environment locates the binding of the variable in the environment and changes that binding to indicate the new value. That is, one finds the first frame in the environment that contains a binding for the variable and modifies that frame. If the variable is unbound in the environment, then `set!` signals an error.
+
+Recall from Section 1.3.2 that let is **simply syntactic sugar** for a procedure call:
+
+```scheme
+(let ((⟨var⟩ ⟨exp⟩)) ⟨body⟩)
+
+; This is original syntax above.
+((lambda (⟨var⟩) ⟨body⟩) ⟨exp⟩)
+```
+
+
+
+
+
+#### 3.3.1 Mutable List Structure
+
+The primitive mutators for pairs are `set-car!` and `set-cdr!`. `set-car!` takes two arguments, the first of which must be a pair. **It modifies this pair, replacing the car pointer by a pointer to the second argument of `set-car!`.**
+
+
+
+**Sharing and identity**
+
+These issues arise in practice when individual pairs are shared among different data objects.
+
+In general, sharing is completely undetectable if we operate on lists using only cons, car, and cdr. However, if we allow mutators on list structure, sharing becomes significant.
+
+More generally, `(eq? x y)` tests whether x and y are the same object (that is, whether x and y are equal as pointers).
