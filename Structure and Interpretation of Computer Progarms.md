@@ -467,6 +467,7 @@ Recall from Section 1.3.2 that let is **simply syntactic sugar** for a procedure
 ((lambda (⟨var⟩) ⟨body⟩) ⟨exp⟩)
 ```
 
+**This means `let` is a function(procedure) without parameter.**
 
 
 
@@ -484,3 +485,89 @@ These issues arise in practice when individual pairs are shared among different 
 In general, sharing is completely undetectable if we operate on lists using only cons, car, and cdr. However, if we allow mutators on list structure, sharing becomes significant.
 
 More generally, `(eq? x y)` tests whether x and y are the same object (that is, whether x and y are equal as pointers).
+
+
+
+### 3.4 Concurrency: Time Is of the Essence
+
+The central issue lurking beneath the complexity of state, sameness, and change is that by introducing assignment we are forced to admit time into our computational models. Before we introduced assignment,
+all our programs were timeless, in the sense that any expression that has a value always has the same value.
+
+
+
+### 3.5 Streams
+
+#### 3.5.1 Streams Are Delayed Lists
+
+Our implementation of streams will be based on a special form called `delay`. Evaluating `(delay ⟨exp⟩)` does not evaluate the expression `⟨exp⟩`, but rather returns a so-called **delayed object**, which we can think of as a “promise” to evaluate `⟨exp⟩` at some future time. As a companion to delay, there is a procedure called `force` that takes a delayed object as argument and performs the evaluation—in effect, forcing the delay to fulfill its promise. We will see below how `delay` and `force` can be implemented, but first let us use these to construct streams.
+
+```scheme
+(cons-stream <a> <b>)
+
+; is equivalent to
+(cons <a> (delay <b>))
+```
+
+```scheme
+(define (stream-car stream) (car stream))
+(define (stream-cdr stream) (force (cdr stream)))
+```
+
+
+
+Implementing `delay` and `force`
+
+```scheme
+(delay <exp>)
+
+; is syntactic sugar for
+(lambda () <exp>)
+
+
+; force
+(define (force delayObject) (delayObject))
+```
+
+In many applications, we end up forcing the same delayed object many times. This can lead to serious inefficiency in recursive programs involving streams
+
+The first time the memoized procedure is run, it saves the computed result. On subsequent evaluations, it simply returns the result.
+
+```scheme
+(define (memoProc proc)
+    (let 
+        ((alreadyRun #f) (result #f))
+        (lambda ()
+            (if (eq? alreadyRun #f)
+                (begin
+                    (set! result (proc))
+                    (set! alreadyRun #t)
+                    result
+                )
+                result
+            )
+        )
+    )
+)
+
+(define (delay expression)
+    (memoProc (lambda () expression))
+)
+```
+
+
+
+
+
+
+
+Infinite Streams
+
+What is more striking, we can use streams to represent sequences that are infinitely long.
+
+```scheme
+(define (integers-starting-from n)
+	(cons-stream n (integers-starting-from (+ n 1)))
+)
+(define integers (integers-starting-from 1))
+```
+
