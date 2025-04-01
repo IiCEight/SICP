@@ -45,3 +45,7 @@ exercise 2.76 - end (To be solved)
 exercise 3.4 (To be solved)
 
 exercise 3.6 - 3.15 (To be solved)
+
+exercise 3.16 - end (To be solved)
+
+## Chapter 4

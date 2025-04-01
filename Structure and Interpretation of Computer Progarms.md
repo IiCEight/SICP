@@ -558,8 +558,6 @@ The first time the memoized procedure is run, it saves the computed result. On s
 
 
 
-
-
 Infinite Streams
 
 What is more striking, we can use streams to represent sequences that are infinitely long.
@@ -571,3 +569,373 @@ What is more striking, we can use streams to represent sequences that are infini
 (define integers (integers-starting-from 1))
 ```
 
+
+
+A functional-programming view of time
+
+Now we have seen that streams provide an alternative way to model objects with local state. We can model a changing quantity, such as the local state of some object, using a stream that represents the time history of successive states. In essence, we represent time explicitly, using streams, so that we decouple time in our simulated world from the sequence of events that take place during evaluation. Indeed, because of the presence of delay there may be lile relation between simulated time in the model and the order of events during the evaluation.
+
+
+
+
+
+## 4 Metalinguistic Abstraction
+
+**Metalinguistic abstraction**—establishing new languages—plays an important role in all branches of engineering design. It is particularly important to computer programming, because in programming not only can we formulate new languages but we can also implement these languages by constructing evaluators. An **evaluator** (or **interpreter**) for a programming language is a procedure that, when applied to an expression of the language, performs the actions required to evaluate that expression.
+
+It is no exaggeration to regard this as the most fundamental idea in programming:
+
+**The evaluator, which determines the meaning of expressions in a programming language, is just another program.**
+
+To appreciate this point is to change our images of ourselves as programmers. We come to see ourselves as designers of languages, rather than only users of languages designed by others.
+
+In fact, we can regard almost any program as the evaluator for some language.
+
+The digital-logic simulator of Section 3.3.4 and the constraint propagator of Section 3.3.5 are legitimate languages in their own right, each with its own primitives, means of combination, and means of abstraction.
+
+We now embark on a tour of the technology by which languages are established in terms of other languages. **In this chapter we shall use Lisp as a base, implementing evaluators as Lisp procedures.**
+
+
+
+### 4.1 The Metacircular Evaluator
+
+Our evaluator for Lisp will be implemented as a Lisp program. An evaluator that is writ ten in the same language that it evaluates is said to be **metacircular**.
+
+The metacircular evaluator is essentially a Scheme formulation of the environment model of evaluation described in Section 3.2.
+
+Recall that the model has two basic parts:
+
+1. To evaluate a combination (a compound expression other than a special form), evaluate the subexpressions and then apply the value of the operator subexpression to the values of the operand subexpressions.
+
+2. To apply a compound procedure to a set of arguments, evaluate the body of the procedure in a new environment. To construct this environment, extend the environment part of the procedure object by a frame in which the formal parameters of the procedure are bound to the arguments to which the procedure is applied.
+
+These two rules describe the essence of the evaluation process, a basic cycle in which expressions to be evaluated in environments are reduced to procedures to be applied to arguments, which in turn are reduced to new expressions to be evaluated in new environments, and so on, until we get down to symbols, whose values are looked up in the environment, and to primitive procedures, which are applied directly (see Figure 4.1).4 This evaluation cycle will be embodied by the interplay between the two critical procedures in the evaluator, **eval** and **apply**, which are described in Section 4.1.1 (see Figure 4.1).
+
+
+
+#### 4.1.1 The Core of the Evaluator
+
+The evaluation process can be described as the interplay between two procedures: **eval** and **apply**.
+
+**Eval**
+
+eval takes as arguments an expression and an environment.
+
+Primitive expressions
+
+1. For self-evaluating expressions, such as numbers, eval returns the expression itself.
+2. **eval** must look up variables in the environment to find their values.
+
+Special forms
+
+1. For quoted expressions, eval returns the expression that was quoted.
+2. An assignment to (or a definition of) a variable must recursively call eval to compute the new value to be associated with the variable. The environment must be modified to change (or create) the binding of the variable.
+3. An `if` expression requires special processing of its parts, so as to evaluate the consequent if the predicate is true, and otherwise to evaluate the alternative.
+4. A `lambda` expression must be transformed into an applicable procedure by packaging together the parameters and body specified by the lambda expression with the environment of the evaluation.
+5. A `begin` expression requires evaluating its sequence of expressions in the order in which they appear.
+6. A case analysis (`cond`) is transformed into a nest of if expressions and then evaluated.
+
+Combinations
+
+1. For a procedure application, **eval** must recursively evaluate the operator part and the operands of the combination. The resulting procedure and arguments are passed to apply, which handles the actual procedure application.
+
+```scheme
+(define (eval exp env)
+    (cond
+        ((isSelfEvaluating exp) exp)
+        ((isVariable exp)   (loopUpVariableValue exp env))
+        ((isQuoted exp)     (textOfQuotation exp))
+        ((isAssignment exp) (evalAssignment exp env))
+        ((isDefinition exp) (evalDefinition exp env))
+        ((isIf exp)         (evalIf exp env))
+        ((isLambda exp)
+            (makeProcedure
+                (lambdaParameter exp)
+                (lambdaBody exp)
+                env
+            )
+        )
+        ((isBegin exp)
+            (evalSequence (beginAction exp) env)
+        )
+        ((isCond exp)       (eval (cond->if exp) env))
+        ((isAppication exp)
+            (apply
+                (eval (operator exp) env)
+                (listOfValues (operand exp) env)
+            )
+        )
+        (else
+            (error "Unknown expression type: EVAL" exp)
+        )
+    )
+)
+```
+
+
+
+**Apply**
+
+**apply** takes two arguments, a procedure and a list of arguments to which the procedure should be applied.
+
+```scheme
+(define (apply procedure argument)
+    (cond
+        ((isPrimitiveProcedure procedure)
+            (applyPrimitiveProcedure procedure argument)
+        )
+        ((isCompoundProcedure procedure)
+            (evalSequence
+                (procedureBody procedure)
+                (extendEnvironment
+                    (procedureParameter procedure)
+                    argument
+                    (procedureEnvironmnet procedure)
+                )
+            )
+        )
+        (else
+            (error "Unknown procedure type: APPLY" procedure)
+        )
+    )
+)
+```
+
+
+
+**Procedure arguments**
+
+When eval processes a procedure application, it uses `listOfValues` to produce the list of arguments to which the procedure is to be applied.
+
+```scheme
+(define (listOfValues exp env)
+    (if (isNoOperand exp)
+        '()
+        (cons
+            (eval (firstOperand exp) env)
+            (listOfValues (restOperand exp) env)
+        )
+    )
+)
+```
+
+
+
+**Conditionals**
+
+```scheme
+(define (evalIf exp env)
+    (if (isTrue (eval (ifPredicate exp) env))
+        (eval (ifConsequent exp) env)
+        (eval (ifAlternative exp) env)
+    )
+)
+```
+
+
+
+**Sequences**
+
+`evalSequence` is used by apply to evaluate the sequence of expressions in a procedure body and by eval to evaluate the sequence of expressions in a begin expression.
+
+```scheme
+(define (evalSequence exp env)
+    (cond 
+        ((isLastExp exp) (eval (firstExp exp) env))
+        (else
+            (eval (firstExp exp) env)
+            (evalSequence (restExp exp) env)
+        )
+    )
+)
+```
+
+
+
+**Assignments and definitions**
+
+The following procedure handles assignments to variables.
+
+It calls **eval** to find the value to be assigned and transmits the variable and the resulting value to `setVariableValue!` to be installed in the designated environment.
+
+```scheme
+(define (evalAssignment exp env)
+    (setVariableValue 
+        (assignmentVariable exp)
+        (eval (assignmentValue exp) env)
+        env
+    )
+    'ok
+)
+
+(define (evalDefinition exp env)
+    (defineVariable
+        (definitionVariable exp)
+        (eval (definitionValue exp) env)
+        env
+    )
+    'ok
+)
+```
+
+
+
+#### 4.1.2 Representing Expressions
+
+Here is the specification of the syntax of our language:
+
+1. The only self-evaluating items are numbers and strings:
+
+```scheme
+(define (isSelfEvaluating exp)
+    (cond
+        ((isNumber exp) #t)
+        ((isString exp) #t)
+        (else           #f)
+    )
+)
+```
+
+2. Variable are represented by symbols:
+
+```scheme
+(define (isVariable exp) (isSymbol exp))
+```
+
+3. Qotations have the form `(quote ⟨text-of-quotation⟩)`:
+
+As mentioned in Section 2.3.1, the evaluator sees a quoted expression as a list beginning with quote, even if the expression is typed with the quotation mark. For example, the expression `'a` would be seen by the evaluator as `(quote a)`.
+
+```scheme
+(define (isVariable exp) (isSymbol exp))
+
+(define (isQuoted exp) (isTaggedList exp 'quote))
+(define (textOfQuotation exp) (cadr exp))
+
+(define (isTaggedList exp tag)
+    (if (pair? exp)
+        (eq? (car exp) tag)
+        #f
+    )
+)
+```
+
+4. Assignments have the form `(set! ⟨var⟩ ⟨value⟩)`
+
+```scheme
+(define (isAssignment exp) (isTaggedList exp 'set!))
+(define (assignmentVariable exp) (cadr exp))
+(define (assignmentValue exp) (caddr exp))
+```
+
+5.Defintions have form
+
+```scheme
+(define ⟨var⟩ ⟨value⟩)
+```
+
+or the form
+
+```scheme
+(define (⟨var⟩ ⟨parameter1⟩ ... ⟨parametern⟩)
+	<body>  
+)
+```
+
+The latter form (standard procedure definition) is syntactic sugar for
+
+```scheme
+(define <var>
+	(lambda (⟨parameter1⟩ ... ⟨parametern⟩)
+ 	 	<body>  	
+    )  
+)
+```
+
+The corresponding syntax procedures are the following:
+
+```scheme
+(define (isDefinition exp) (isTaggedList exp 'define))
+(define (definitionVariable exp)
+    (if (isSymbol (cadr exp))
+        (cadr exp)
+        (caadr exp)
+    )
+)
+(define (definitionValue exp)
+    (if (isSymbol (cadr exp))
+        (caddr exp)
+        (makeLambda 
+            (cdadr exp)     ; formal parameters
+            (cddr exp)      ; body
+        )
+    )
+)
+```
+
+6. lambda expressions are lists that begin with the symbol lambda:
+
+```scheme
+(define (isLambda exp) (isTaggedList exp 'lambda))
+(define (lambdaParameter exp) (cadr exp))
+(define (lambdaBody exp) (cddr exp))
+```
+
+We also provide a constructor for lambda expressions, which is used by definition-value, above:
+
+```scheme
+(define (makeLambda parameters body)
+    (cons 'lambda (cons parameters body))
+)
+```
+
+7. Conditionals begin with `if` and have a predicate, a consequent, and an (optional) alternative. If the expression has no alternative part, we provide false as the alternative.
+
+```scheme
+(define (isIf exp) (isTaggedList exp 'if))
+(define (ifPredicate exp) (cadr exp))
+(define (ifConsequent exp) (caddr exp))
+(define (ifAlternative exp)
+    (if (not (null? (cdddr exp)))
+        (cadddr exp)
+        'false
+    )
+)
+```
+
+We also provide a constructor for `if` expressions, to be used by `cond->if` to transform cond expressions into `if` expressions:
+
+```scheme
+(define (makeIf predicate consequent alternative)
+    (list 'if predicate consequent alternative)
+)
+```
+
+8. `begin` packages a sequence of expressions into a single expression. We include syntax operations on begin expressions to extract the actual sequence from the begin expression, as well as selectors that return the first expression and the rest of the expressions in the sequence.
+
+```scheme
+(define (isBegin exp) (isTaggedList exp 'begin))
+(define (beginAction exp) (cdr exp))
+(define (isLastExp  seq) (null? (cdr seq)))
+(define (firstExp   seq) (car seq))
+(define (restExp    seq) (cdr seq))
+
+(define (sequenceToExp seq)
+    (cond
+        ((null? seq) seq)
+        ((isLastExp seq) (firstExp seq))
+        (else (makeBegin seq))
+    )
+)
+(define (makeBegin seq) (cons 'begin seq))
+```
+
+9. A procedure application is any compound expression that is not one of the above expression types. e car of the expression is the operator, and the cdr is the list of operands:
+
+
+
+**Derived expressions**
+
+Some special forms in our language can be defined in terms of expressions involving other special forms, rather than being implemented directly. One example is `cond`, which can be implemented as a nest of `if` expressions.
+
+Expressions (such as cond) that we choose to implement as syntactic transformations are called **derived expressions**. let expressions are also derived expressions.
